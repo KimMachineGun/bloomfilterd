@@ -83,5 +83,5 @@ func (f *BloomFilter) getIndices(key []byte, h hash.Hash64) (uint64, uint64) {
 	h.Write(key)
 	defer h.Reset()
 	idx := h.Sum64() % f.m
-	return uint64(len(f.bytes)) - idx/8, idx % 8
+	return uint64(len(f.bytes)-1) - idx/8, idx % 8
 }
