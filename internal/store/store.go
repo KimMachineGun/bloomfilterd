@@ -19,12 +19,12 @@ type Config struct {
 	N uint64
 	P float64
 
-	NodeID string
-	Addr   string
+	NodeID           string
+	Addr             string
 	TransportMaxPool int           // 5
 	TransportTimeout time.Duration // 10s
-	Dir    string
-	SnapshotRetain int // 5
+	Dir              string
+	SnapshotRetain   int // 5
 
 	ApplyTimeout time.Duration // 10s
 }
