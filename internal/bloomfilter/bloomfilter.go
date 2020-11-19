@@ -2,7 +2,7 @@ package bloomfilter
 
 import (
 	"hash"
-	"math"
+	"sync"
 )
 
 type BloomFilter struct {
@@ -11,8 +11,10 @@ type BloomFilter struct {
 	m uint64  // number of bits
 	k uint64  // number of hash functions
 
-	bytes  []byte
-	hashes []hash.Hash64
+	pool    *sync.Pool
+	hashers []hash.Hash64
+
+	bf *bf
 }
 
 func New(n uint64, p float64) *BloomFilter {
@@ -23,8 +25,14 @@ func New(n uint64, p float64) *BloomFilter {
 		m: m,
 		k: k,
 
-		bytes:  make([]byte, int(math.Ceil(float64(m)/float64(8)))),
-		hashes: getMurMur3Hashes(k),
+		pool: &sync.Pool{
+			New: func() interface{} {
+				return make([]uint64, k)
+			},
+		},
+		hashers: getMurmur3Hashers(k),
+
+		bf: newBF(m),
 	}
 }
 
@@ -45,43 +53,38 @@ func (f *BloomFilter) K() uint64 {
 }
 
 func (f *BloomFilter) Bytes() []byte {
-	return f.bytes
+	return f.bf.b
 }
 
 func (f *BloomFilter) Set(key []byte) bool {
-	exists := true
-	for _, h := range f.hashes {
-		exists = f.setBit(f.getIndices(key, h)) && exists
-	}
+	hashes := f.generateHashes(key)
+	defer f.poolHashes(hashes)
 
-	return exists
+	return f.bf.set(hashes)
 }
 
 func (f *BloomFilter) Check(key []byte) bool {
-	for _, h := range f.hashes {
-		bytesIdx, idx := f.getIndices(key, h)
-		b := f.bytes[bytesIdx]
-		if b&(1<<idx) == 0 {
-			return false
-		}
-	}
+	hashes := f.generateHashes(key)
+	defer f.poolHashes(hashes)
 
-	return true
+	return f.bf.check(hashes)
 }
 
-func (f *BloomFilter) setBit(bytesIdx uint64, idx uint64) bool {
-	b := f.bytes[bytesIdx]
-	exists := b&(1<<idx) != 0
-	if !exists {
-		f.bytes[bytesIdx] = b | (1 << idx)
-	}
-
-	return exists
+func (f *BloomFilter) Reset() {
+	f.bf.reset()
 }
 
-func (f *BloomFilter) getIndices(key []byte, h hash.Hash64) (uint64, uint64) {
-	h.Write(key)
-	defer h.Reset()
-	idx := h.Sum64() % f.m
-	return uint64(len(f.bytes)-1) - idx/8, idx % 8
+func (f *BloomFilter) generateHashes(key []byte) []uint64 {
+	hashes := f.pool.Get().([]uint64)
+	for i, h := range f.hashers {
+		h.Write(key)
+		hashes[i] = h.Sum64()
+		h.Reset()
+	}
+
+	return hashes
+}
+
+func (f *BloomFilter) poolHashes(hashes []uint64) {
+	f.pool.Put(hashes)
 }

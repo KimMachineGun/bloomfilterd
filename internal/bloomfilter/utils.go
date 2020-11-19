@@ -14,7 +14,7 @@ func getMKFromNP(n uint64, p float64) (uint64, uint64) {
 	return m, k
 }
 
-func getMurMur3Hashes(k uint64) []hash.Hash64 {
+func getMurmur3Hashers(k uint64) []hash.Hash64 {
 	hashes := make([]hash.Hash64, k)
 	for idx := range hashes {
 		hashes[idx] = murmur3.New64WithSeed(uint32(idx))
