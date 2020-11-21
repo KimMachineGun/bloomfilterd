@@ -7,7 +7,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/KimMachineGun/bfd/internal/bloomfilter"
+	"github.com/KimMachineGun/bloomfilterd/internal/bloomfilter"
 
 	"github.com/hashicorp/raft"
 )

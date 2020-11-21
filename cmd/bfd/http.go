@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/KimMachineGun/bfd/internal/store"
+	"github.com/KimMachineGun/bloomfilterd/internal/store"
 )
 
 type Handler struct {

@@ -1,4 +1,4 @@
-module github.com/KimMachineGun/bfd
+module github.com/KimMachineGun/bloomfilterd
 
 go 1.14
 

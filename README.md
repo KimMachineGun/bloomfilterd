@@ -1,5 +1,5 @@
-# bfd (WIP)
-bfd is a 'distributed [bloom filter](https://en.wikipedia.org/wiki/Bloom_filter)' for real-time deduplication at scale.
+# bloomfilterd (WIP)
+bloomfilterd is a 'distributed [bloom filter](https://en.wikipedia.org/wiki/Bloom_filter)' for real-time deduplication at scale.
 It replicates the data based on the raft consensus algorithm.
 
 ## Usage

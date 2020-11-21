@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/KimMachineGun/bfd/internal/store"
+	"github.com/KimMachineGun/bloomfilterd/internal/store"
 
 	"github.com/KimMachineGun/flago"
 )

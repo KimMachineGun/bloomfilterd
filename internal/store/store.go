@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/KimMachineGun/bfd/internal/fsm"
+	"github.com/KimMachineGun/bloomfilterd/internal/fsm"
 
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
