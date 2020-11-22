@@ -24,8 +24,8 @@ type TermWindowedBloomFilter struct {
 }
 
 type tbf struct {
-	t uint64
-	f *bf
+	t  uint64
+	bf *bf
 }
 
 func NewTermWindowedBloomFilter(n uint64, p float64, retention uint64) *TermWindowedBloomFilter {
@@ -34,8 +34,8 @@ func NewTermWindowedBloomFilter(n uint64, p float64, retention uint64) *TermWind
 	tbfs := make([]*tbf, retention)
 	for i := range tbfs {
 		tbfs[i] = &tbf{
-			t: uint64(i),
-			f: newBF(m),
+			t:  uint64(i),
+			bf: newBF(m),
 		}
 	}
 
@@ -99,16 +99,12 @@ func (f *TermWindowedBloomFilter) set(key []byte) bool {
 
 	for i := f.term.earliest; i < f.term.latest; i++ {
 		tbf := f.getTBF(i)
-		if tbf.t < f.term.earliest {
-			continue
-		}
-
-		if tbf.f.check(hashes) {
+		if tbf.t == i && tbf.bf.check(hashes) {
 			return true
 		}
 	}
 
-	return f.getTBF(f.term.latest).f.set(hashes)
+	return f.getTBF(f.term.latest).bf.set(hashes)
 }
 
 func (f *TermWindowedBloomFilter) Check(key []byte) bool {
@@ -129,11 +125,7 @@ func (f *TermWindowedBloomFilter) check(key []byte) bool {
 
 	for i := f.term.latest; i >= f.term.earliest; i-- {
 		tbf := f.getTBF(i)
-		if tbf.t < f.term.earliest {
-			continue
-		}
-
-		if tbf.f.check(hashes) {
+		if tbf.t == i && tbf.bf.check(hashes) {
 			return true
 		}
 	}
@@ -173,7 +165,7 @@ func (f *TermWindowedBloomFilter) updateTerm(term uint64) error {
 
 	tbf := f.getTBF(f.term.latest)
 	tbf.t = f.term.latest
-	tbf.f.reset()
+	tbf.bf.reset()
 
 	return nil
 }
